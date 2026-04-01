@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 UPLOAD_DIR = DATA_DIR / "uploads"
 DB_PATH = DATA_DIR / "app.db"
+STATIC_DIR = BASE_DIR / "static"
 
 
 def utc_now_iso() -> str:
@@ -151,6 +152,31 @@ def guess_media_type(filename: str) -> str:
 
 app = Flask(__name__)
 CORS(app)
+
+@app.get("/")
+@app.get("/<path:path>")
+def spa(path: str = ""):
+    # 只处理前端静态资源与 SPA 路由回退，避免影响 /api 与 /media
+    if request.path.startswith("/api") or request.path.startswith("/media"):
+        return jsonify({"error": "not found"}), 404
+
+    index = STATIC_DIR / "index.html"
+    if not index.exists():
+        return (
+            jsonify(
+                {
+                    "error": "frontend not built",
+                    "hint": "run: cd frontend && npm run build",
+                }
+            ),
+            503,
+        )
+
+    candidate = (STATIC_DIR / path).resolve()
+    if path and str(candidate).startswith(str(STATIC_DIR.resolve())) and candidate.is_file():
+        return send_from_directory(STATIC_DIR, path)
+
+    return send_from_directory(STATIC_DIR, "index.html")
 
 
 @app.get("/media/<path:filename>")

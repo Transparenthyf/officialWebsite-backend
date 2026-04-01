@@ -6,7 +6,7 @@
 
 ```powershell
 cd backend
-.\.venv\Scripts\python app.py
+.\start.ps1
 ```
 
 服务默认监听 `http://localhost:5000`。
