@@ -11,6 +11,19 @@ cd backend
 
 服务默认监听 `http://localhost:5000`。
 
+## Linux 后台启动（推荐）
+
+```bash
+cd backend
+chmod +x ./start.sh
+./start.sh
+```
+
+脚本会后台运行，并生成：
+
+- `backend/backend.pid`：进程号
+- `backend/backend.log`：运行日志
+
 ## 主要接口
 
 - `GET /api/public/site`：站点配置（公司介绍、联系方式、首页图/视频 URL）

@@ -35,6 +35,23 @@ echo "Installing dependencies..."
 "$VENV_PY" -m pip install -U pip
 "$VENV_PY" -m pip install -r requirements.txt
 
-echo "Starting backend..."
-"$VENV_PY" app.py
+PID_FILE="backend.pid"
+LOG_FILE="backend.log"
+
+if [[ -f "$PID_FILE" ]]; then
+  old_pid="$(cat "$PID_FILE" || true)"
+  if [[ -n "${old_pid}" ]] && kill -0 "${old_pid}" >/dev/null 2>&1; then
+    echo "Backend already running (pid=${old_pid})."
+    echo "Log: $(pwd)/${LOG_FILE}"
+    exit 0
+  fi
+fi
+
+echo "Starting backend in background..."
+nohup "$VENV_PY" app.py >"$LOG_FILE" 2>&1 &
+new_pid="$!"
+echo "$new_pid" >"$PID_FILE"
+
+echo "Started. pid=${new_pid}"
+echo "Log: $(pwd)/${LOG_FILE}"
 
