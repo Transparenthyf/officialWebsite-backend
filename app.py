@@ -174,9 +174,18 @@ def spa(path: str = ""):
 
     candidate = (STATIC_DIR / path).resolve()
     if path and str(candidate).startswith(str(STATIC_DIR.resolve())) and candidate.is_file():
-        return send_from_directory(STATIC_DIR, path)
+        resp = send_from_directory(STATIC_DIR, path)
+        # Vite 构建的 assets 文件名带 hash，适合长期缓存
+        if path.startswith("assets/"):
+            resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return resp
 
-    return send_from_directory(STATIC_DIR, "index.html")
+    resp = send_from_directory(STATIC_DIR, "index.html")
+    # SPA 入口不要缓存：否则手机可能一直用旧的 JS，导致 API_BASE 等配置不一致
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 @app.get("/media/<path:filename>")

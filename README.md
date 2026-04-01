@@ -9,7 +9,7 @@ cd backend
 .\start.ps1
 ```
 
-服务默认监听 `http://localhost:5000`。
+服务默认监听 `http://localhost:5001`。
 
 ## Linux 后台启动（推荐）
 
